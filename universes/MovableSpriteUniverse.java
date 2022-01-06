@@ -92,8 +92,8 @@ public class MovableSpriteUniverse implements Universe {
 			
 			if (sprite instanceof MovableSprite) {
 				MovableSprite movable = (MovableSprite)sprite;
-				movable.moveX(velocityX);
-				movable.moveY(velocityY);
+				movable.setVelocityX(velocityX);
+				movable.setVelocityY(velocityY);
 			}
 			
 			sprite.update(this, null, actual_delta_time);
