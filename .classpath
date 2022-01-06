@@ -7,5 +7,6 @@
 	<classpathentry kind="src" path="gui"/>
 	<classpathentry kind="src" path="universes"/>
 	<classpathentry kind="src" path="sprites"/>
+	<classpathentry kind="src" path="animations"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
