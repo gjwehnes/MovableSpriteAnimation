@@ -96,7 +96,7 @@ public class MovableSpriteUniverse implements Universe {
 				movable.moveY(velocityY);
 			}
 			
-			sprite.update(this, keyboard, actual_delta_time);
+			sprite.update(this, null, actual_delta_time);
     	}    	
 
 	}
