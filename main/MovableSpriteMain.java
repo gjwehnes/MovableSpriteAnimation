@@ -1,5 +1,5 @@
 
-public class Main {
+public class MovableSpriteMain {
 	
 	public static void main(String[] args)
 	{
