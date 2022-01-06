@@ -23,9 +23,9 @@ public interface DisplayableSprite {
 	public double getCenterY();
 	
 	public boolean getDispose();
-
-	public void setDispose(boolean dispose);
 	
+	public boolean setDispose();
+
 	public void update(Universe universe, KeyboardInput keyboard, long actual_delta_time);	
 	
 }

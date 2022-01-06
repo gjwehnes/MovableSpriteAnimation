@@ -19,7 +19,7 @@ public class MovableSpriteUniverse implements Universe {
 	
 	this.setXCenter(0);
 	this.setYCenter(0);
-	player1 = new GJWSprite();
+	player1 = new ABCSprite();
 	sprites.add(player1);
 	
 }
@@ -96,7 +96,7 @@ public class MovableSpriteUniverse implements Universe {
 				movable.moveY(velocityY);
 			}
 			
-			sprite.update(this, null, actual_delta_time);
+			sprite.update(this, keyboard, actual_delta_time);
     	}    	
 
 	}
