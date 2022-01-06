@@ -7,29 +7,27 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.MouseMotionAdapter;
 
 
 public class AnimationFrame extends JFrame {
 
 	final public static int FRAMES_PER_SECOND = 60;
-	final public static int SCREEN_HEIGHT = 750;
-	final public static int SCREEN_WIDTH = 1000;
+	final public static int SCREEN_HEIGHT = 600;
+	final public static int SCREEN_WIDTH = 800;
 
-	private int xpCenter = SCREEN_WIDTH / 2;
-	private int ypCenter = SCREEN_HEIGHT / 2;
+	private int screenCenterX = SCREEN_WIDTH / 2;
+	private int screenCenterY = SCREEN_HEIGHT / 2;
 
 	private double scale = 1;
 	//point in universe on which the screen will center
-	private double xCenter = 0;		
-	private double yCenter = 0;
+	private double logicalCenterX = 0;		
+	private double logicalCenterY = 0;
 
 	private JPanel panel = null;
 	private JButton btnPauseRun;
-	private JLabel lblTimeLabel;
-	private JLabel lblTime;
-	private JLabel lblLevelLabel;
-	private JLabel lblLevel;
-	private JLabel lblStatus;;
+	private JLabel lblTop;
+	private JLabel lblBottom;
 
 	private static boolean stop = false;
 
@@ -78,7 +76,13 @@ public class AnimationFrame extends JFrame {
 				keyboard.keyReleased(arg0);
 			}
 		});
-
+		getContentPane().addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				contentPane_mouseMoved(e);
+			}
+		});
+		
 		Container cp = getContentPane();
 		cp.setBackground(Color.BLACK);
 		cp.setLayout(null);
@@ -97,45 +101,25 @@ public class AnimationFrame extends JFrame {
 		});
 
 		btnPauseRun.setFont(new Font("Tahoma", Font.BOLD, 12));
-		btnPauseRun.setBounds(20, 20, 48, 32);
+		btnPauseRun.setBounds(SCREEN_WIDTH - 64, 20, 48, 32);
 		btnPauseRun.setFocusable(false);
 		getContentPane().add(btnPauseRun);
 		getContentPane().setComponentZOrder(btnPauseRun, 0);
 
-		lblTimeLabel = new JLabel("Time: ");
-		lblTimeLabel.setForeground(Color.YELLOW);
-		lblTimeLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
-		lblTimeLabel.setBounds(80, 22, 96, 30);
-		getContentPane().add(lblTimeLabel);
-		getContentPane().setComponentZOrder(lblTimeLabel, 0);
+		lblTop = new JLabel("Time: ");
+		lblTop.setForeground(Color.WHITE);
+		lblTop.setFont(new Font("Consolas", Font.BOLD, 20));
+		lblTop.setBounds(16, 22, SCREEN_WIDTH - 16, 30);
+		getContentPane().add(lblTop);
+		getContentPane().setComponentZOrder(lblTop, 0);
 
-		lblTime = new JLabel("000");
-		lblTime.setForeground(Color.YELLOW);
-		lblTime.setFont(new Font("Tahoma", Font.BOLD, 30));
-		lblTime.setBounds(192, 22, 320, 30);
-		getContentPane().add(lblTime);
-		getContentPane().setComponentZOrder(lblTime, 0);
-
-		lblLevelLabel = new JLabel("Level: ");
-		lblLevelLabel.setForeground(Color.YELLOW);
-		lblLevelLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
-		lblLevelLabel.setBounds(528, 22, 128, 30);
-		getContentPane().add(lblLevelLabel);
-		getContentPane().setComponentZOrder(lblLevelLabel, 0);
-
-		lblLevel = new JLabel("1");
-		lblLevel.setForeground(Color.YELLOW);
-		lblLevel.setFont(new Font("Tahoma", Font.BOLD, 30));
-		lblLevel.setBounds(672, 22, 48, 30);
-		getContentPane().add(lblLevel);
-		getContentPane().setComponentZOrder(lblLevel, 0);
-
-		lblStatus = new JLabel("Status");
-		lblStatus.setForeground(Color.WHITE);
-		lblStatus.setFont(new Font("Tahoma", Font.BOLD, 30));
-		lblStatus.setBounds(0, SCREEN_HEIGHT - 30 - 16, SCREEN_WIDTH, 36);
-		getContentPane().add(lblStatus);
-		getContentPane().setComponentZOrder(lblStatus, 0);
+		lblBottom = new JLabel("Status");
+		lblBottom.setForeground(Color.WHITE);
+		lblBottom.setFont(new Font("Consolas", Font.BOLD, 30));
+		lblBottom.setBounds(16, SCREEN_HEIGHT - 30 - 16, SCREEN_WIDTH - 16, 36);
+		lblBottom.setHorizontalAlignment(SwingConstants.CENTER);
+		getContentPane().add(lblBottom);
+		getContentPane().setComponentZOrder(lblBottom, 0);
 
 	}
 
@@ -166,8 +150,8 @@ public class AnimationFrame extends JFrame {
 			background = universe.getBackground();
 			centreOnPlayer = universe.centerOnPlayer();
 			this.scale = universe.getScale();
-			this.xCenter = universe.getXCenter();
-			this.yCenter = universe.getYCenter();
+			this.logicalCenterX = universe.getXCenter();
+			this.logicalCenterY = universe.getYCenter();
 
 			// main game loop
 			while (stop == false && universe.isComplete() == false) {
@@ -198,13 +182,13 @@ public class AnimationFrame extends JFrame {
 
 				//UPDATE STATE
 				updateTime();
+				
 				universe.update(keyboard, actual_delta_time);
 				updateControls();
 
 				//REFRESH
-				this.scale = universe.getScale();
-				this.xCenter = universe.getXCenter();
-				this.yCenter = universe.getYCenter();
+				this.logicalCenterX = universe.getXCenter();
+				this.logicalCenterY = universe.getYCenter();
 				this.repaint();
 			}
 
@@ -220,10 +204,11 @@ public class AnimationFrame extends JFrame {
 	}
 
 	private void updateControls() {
-		this.lblTime.setText(Long.toString(elapsed_time));
-		this.lblLevel.setText(Integer.toString(universeLevel));
+		
+		this.lblTop.setText(String.format("Time: %9.3f;  centerX: %5d; centerY: %5d;  scale: %3.3f", elapsed_time / 1000.0, screenCenterX, screenCenterY, scale));
+		this.lblBottom.setText(Integer.toString(universeLevel));
 		if (universe != null) {
-			this.lblStatus.setText(universe.toString());
+			this.lblBottom.setText(universe.toString());
 		}
 
 	}
@@ -249,6 +234,7 @@ public class AnimationFrame extends JFrame {
 	}
 
 	private void handleKeyboardInput() {
+		
 		if (keyboard.keyDown(80) && ! isPaused) {
 			btnPauseRun_mouseClicked(null);	
 		}
@@ -261,6 +247,20 @@ public class AnimationFrame extends JFrame {
 		if (keyboard.keyDown(113)) {
 			scale /= 1.01;
 		}
+		
+		if (keyboard.keyDown(65)) {
+			screenCenterX -= 1;
+		}
+		if (keyboard.keyDown(68)) {
+			screenCenterX += 1;
+		}
+		if (keyboard.keyDown(83)) {
+			screenCenterY -= 1;
+		}
+		if (keyboard.keyDown(88)) {
+			screenCenterY += 1;
+		}
+		
 	}
 
 	class DrawPanel extends JPanel {
@@ -272,8 +272,8 @@ public class AnimationFrame extends JFrame {
 			}
 
 			if (player1 != null && centreOnPlayer) {
-				xCenter = player1.getCenterX();
-				yCenter = player1.getCenterY();     
+				logicalCenterX = player1.getCenterX();
+				logicalCenterY = player1.getCenterY();     
 			}
 
 			paintBackground(g, background);
@@ -282,11 +282,11 @@ public class AnimationFrame extends JFrame {
 				DisplayableSprite sprite = activeSprite;
 				if (sprite.getVisible()) {
 					if (sprite.getImage() != null) {
-						g.drawImage(sprite.getImage(), translateX(sprite.getMinX()), translateY(sprite.getMinY()), scaleX(sprite.getWidth()), scaleY(sprite.getHeight()), null);
+						g.drawImage(sprite.getImage(), translateToScreenX(sprite.getMinX()), translateToScreenY(sprite.getMinY()), scaleLogicalX(sprite.getWidth()), scaleLogicalY(sprite.getHeight()), null);
 					}
 					else {
 						g.setColor(Color.BLUE);
-						g.fillRect(translateX(sprite.getMinX()), translateY(sprite.getMinY()), scaleX(sprite.getWidth()), scaleY(sprite.getHeight()));
+						g.fillRect(translateToScreenX(sprite.getMinX()), translateToScreenY(sprite.getMinY()), scaleLogicalX(sprite.getWidth()), scaleLogicalY(sprite.getHeight()));
 					}
 				}
 
@@ -294,20 +294,6 @@ public class AnimationFrame extends JFrame {
 
 		}
 		
-		private int translateX(double x) {
-			return xpCenter + scaleX(x - xCenter);
-		}
-		
-		private int scaleX(double x) {
-			return (int) Math.round(scale * x);
-		}
-		private int translateY(double y) {
-			return ypCenter + scaleY(y - yCenter);
-		}		
-		private int scaleY(double y) {
-			return (int) Math.round(scale * y);
-		}
-
 		private void paintBackground(Graphics g, Background background) {
 
 			if ((g == null) || (background == null)) {
@@ -315,11 +301,11 @@ public class AnimationFrame extends JFrame {
 			}
 			
 			//what tile covers the top-left corner?
-			double xTopLeft = ( xCenter - (xpCenter / scale));
-			double yTopLeft =  (yCenter - (ypCenter / scale)) ;
+			double logicalLeft = ( logicalCenterX - (screenCenterX / scale));
+			double logicalTop =  (logicalCenterY - (screenCenterY / scale)) ;
 			
-			int row = background.getRow((int)yTopLeft);
-			int col = background.getCol((int)xTopLeft);
+			int row = background.getRow((int)logicalTop);
+			int col = background.getCol((int)logicalLeft);
 			Tile tile = null;
 
 			boolean rowDrawn = false;
@@ -336,12 +322,12 @@ public class AnimationFrame extends JFrame {
 					}
 					else {
 						Tile nextTile = background.getTile(col+1, row+1);
-						int pwidth = translateX(nextTile.getMinX()) - translateX(tile.getMinX());
-						int pheight = translateY(nextTile.getMinY()) - translateY(tile.getMinY());
-						g.drawImage(tile.getImage(), translateX(tile.getMinX()), translateY(tile.getMinY()), pwidth, pheight, null);
+						int width = translateToScreenX(nextTile.getMinX()) - translateToScreenX(tile.getMinX());
+						int height = translateToScreenY(nextTile.getMinY()) - translateToScreenY(tile.getMinY());
+						g.drawImage(tile.getImage(), translateToScreenX(tile.getMinX()), translateToScreenY(tile.getMinY()), width, height, null);
 					}					
 					//does the RHE of this tile extend past the RHE of the visible area?
-					if (translateX(tile.getMinX() + tile.getWidth()) > SCREEN_WIDTH || tile.isOutOfBounds()) {
+					if (translateToScreenX(tile.getMinX() + tile.getWidth()) > SCREEN_WIDTH || tile.isOutOfBounds()) {
 						rowDrawn = true;
 					}
 					else {
@@ -349,18 +335,48 @@ public class AnimationFrame extends JFrame {
 					}
 				}
 				//does the bottom edge of this tile extend past the bottom edge of the visible area?
-				if (translateY(tile.getMinY() + tile.getHeight()) > SCREEN_HEIGHT || tile.isOutOfBounds()) {
+				if (translateToScreenY(tile.getMinY() + tile.getHeight()) > SCREEN_HEIGHT || tile.isOutOfBounds()) {
 					screenDrawn = true;
 				}
 				else {
 					//TODO - should be passing in a double, as this represents a universe coordinate
-					col = background.getCol((int)xTopLeft);
+					col = background.getCol((int)logicalLeft);
 					row++;
 					rowDrawn = false;
 				}
 			}
 		}				
 	}
+
+	private int translateToScreenX(double logicalX) {
+		return screenCenterX + scaleLogicalX(logicalX - logicalCenterX);
+	}		
+	private int scaleLogicalX(double logicalX) {
+		return (int) Math.round(scale * logicalX);
+	}
+	private int translateToScreenY(double logicalY) {
+		return screenCenterY + scaleLogicalY(logicalY - logicalCenterY);
+	}		
+	private int scaleLogicalY(double logicalY) {
+		return (int) Math.round(scale * logicalY);
+	}
+
+	private double translateToLogicalX(int screenX) {
+		int offset = screenX - screenCenterX;
+		return offset / scale;
+	}
+	private double translateToLogicalY(int screenY) {
+		int offset = screenY - screenCenterY;
+		return offset / scale;			
+	}
+	
+	protected void contentPane_mouseMoved(MouseEvent e) {
+		MouseInput.screenX = e.getX();
+		MouseInput.screenY = e.getY();
+		MouseInput.logicalX = translateToLogicalX(MouseInput.screenX);
+		MouseInput.logicalY = translateToLogicalY(MouseInput.screenY);
+	}
+
 	protected void this_windowClosing(WindowEvent e) {
 		System.out.println("windowClosing()");
 		stop = true;

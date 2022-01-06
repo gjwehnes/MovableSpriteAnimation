@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class CollisionDetection {
 
-	private OneDimensionBounce bounce = new OneDimensionBounce();	
 	private double bounceFactorX = 1;
 	private double bounceFactorY = 1;
 
@@ -24,53 +23,154 @@ public class CollisionDetection {
 		this.bounceFactorY = bounceFactorY;
 	}
 
-	public static boolean overlaps(double a_left, double a_top, double a_right, double a_bottom, double b_left, double b_top, double b_right, double b_bottom) {
-		boolean a_to_left_of_b = (a_right < b_left); //case 1: right edge of A is to the left of left edge of B
-		boolean a_to_right_of_b = (a_left > b_right); //case 2: left edge of A is to the right of right edge of B
-		boolean horizontal_overlap = !(a_to_left_of_b || a_to_right_of_b);
-
-		boolean a_above_b = (a_bottom < b_top); //case 1: bottom edge of A is above top edge of B
-		boolean a_below_b = (a_top > b_bottom); //case 2: top edge of A is below bottom edge of B
-		boolean vertical_overlap = !(a_above_b || a_below_b);
-
-		return (horizontal_overlap && vertical_overlap);
+	public static boolean overlaps(DisplayableSprite spriteA, DisplayableSprite spriteB) {
+		return overlaps(
+				spriteA.getMinX(), 
+				spriteA.getMinY(), 
+				spriteA.getMaxX(), 
+				spriteA.getMaxY(), 
+				spriteB.getMinX(), 
+				spriteB.getMinY(), 
+				spriteB.getMaxX(), 
+				spriteB.getMaxY());		
 	}
 
-	public static boolean inside(double a_left, double a_top, double a_right, double a_bottom, double b_left, double b_top, double b_right, double b_bottom) {
-		boolean x_inside = ((b_left <= a_left) && (a_right <= b_right));
-		boolean y_inside = ((b_top <= a_top) && (a_bottom <= b_bottom));
-		if (x_inside && y_inside) {
+	public static boolean overlaps(DisplayableSprite spriteA, DisplayableSprite spriteB, double deltaAX, double deltaAY) {
+		
+		return overlaps(
+				spriteA.getMinX() + deltaAX, 
+				spriteA.getMinY() + deltaAY, 
+				spriteA.getMaxX() + deltaAX, 
+				spriteA.getMaxY() + deltaAY, 
+				spriteB.getMinX(), 
+				spriteB.getMinY(), 
+				spriteB.getMaxX(), 
+				spriteB.getMaxY());		
+	}
+
+	public static boolean overlaps(double leftA, double topA, double rightA, double bottomA, double leftB, double topB, double rightB, double bottomB) {
+		boolean toLeft = (rightA < leftB); //case 1: right edge of A is to the left of left edge of B, so A is fully to left of A
+		boolean toRight = (leftA > rightB); //case 2: left edge of A is to the right of right edge of B, so A is fully to right of B
+		boolean overlapX = !(toLeft || toRight);
+
+		boolean above = (bottomA < topB); //case 1: bottom edge of A is above top edge of B, so A is fully above B
+		boolean below = (topA > bottomB); //case 2: top edge of A is below bottom edge of B, so A is fully below B
+		boolean overlapY = !(above || below);
+
+		return (overlapX && overlapY);
+	}
+	
+	public static boolean inside(DisplayableSprite spriteA, DisplayableSprite spriteB) {
+		return inside(
+				spriteA.getMinX(), 
+				spriteA.getMinY(), 
+				spriteA.getMaxX(), 
+				spriteA.getMaxY(), 
+				spriteB.getMinX(), 
+				spriteB.getMinY(), 
+				spriteB.getMaxX(), 
+				spriteB.getMaxY());		
+	}
+
+	public static boolean inside(DisplayableSprite spriteA, DisplayableSprite spriteB, double deltaAX, double deltaAY) {
+		
+		return inside(
+				spriteA.getMinX() + deltaAX, 
+				spriteA.getMinY() + deltaAY, 
+				spriteA.getMaxX() + deltaAX, 
+				spriteA.getMaxY() + deltaAY, 
+				spriteB.getMinX(), 
+				spriteB.getMinY(), 
+				spriteB.getMaxX(), 
+				spriteB.getMaxY());		
+	}
+	
+	public static boolean inside(double leftA, double topA, double rightA, double bottomA, double leftB, double topB, double rightB, double bottomB) {
+		boolean insideX = ((leftB <= leftA) && (rightA <= rightB));
+		boolean insideY = ((topB <= topA) && (bottomA <= bottomB));
+		if (insideX && insideY) {
 			return true;
 		}
 		else {
 			return false;	    	
 		}
+	}	
+	
+	public static boolean covers (DisplayableSprite spriteA, DisplayableSprite spriteB) {
+		//A cover B <-->  B inside A
+		return inside(spriteB, spriteA);
+	}
+
+	public static boolean covers (DisplayableSprite spriteA, DisplayableSprite spriteB, double deltaAX, double deltaAY) {
+		//A cover B <-->  B inside A
+		//offset is equivalent
+		return inside(spriteB, spriteA, deltaAX, deltaAY);
+	}
+	
+	public static boolean covers (double leftA, double topA, double rightA, double bottomA, double leftB, double topB, double rightB, double bottomB) {
+		//A cover B <-->  B inside A
+		return inside(leftB, topB, rightB, bottomB, leftA, topA, rightA, bottomA);
+	}
+	
+	public static double overlap(double minA, double maxA,double minB, double maxB) {
+		double widthA = maxA - minA;
+		double widthB = maxB - minB;
+		
+		//A is to left of B or A is to right of B
+		if ((maxA <= minB) || (minA >= maxB)) {
+			return 0;
+		}
+		//B is entirely inside A
+		else if (minA < minB && maxA > maxB) {
+			return widthB;
+		}
+		//A is entirely inside B
+		else if (minB < minA && maxB > maxA) {
+			return widthA;
+		}
+		//A is on B's right edge
+		else if ( (minB < minA) && (minA < maxB)) {
+			return maxB - minA;
+		}
+		else if ( (minA < minB) && (minB < maxB)) {
+			return maxA - minB;
+		}
+		//A and B are identical
+		else if ((minA == minB) && (maxA == maxB)) {
+			return widthA;			
+		}
+		else {
+			//there should not be a case here!
+//			System.out.println("!overlapX - unexpected case");
+			return 0;
+		}
 	}
 	
 	public static boolean pixelBasedOverlaps(DisplayableSprite spriteA, DisplayableSprite spriteB) {
+		return pixelBasedOverlaps(spriteA, spriteB, 0, 0);
+	}
 
-		if (overlaps(spriteA.getMinX(), spriteA.getMinY(), spriteA.getMaxX(), spriteA.getMaxY(), 
-				spriteB.getMinX(), spriteB.getMinY(), spriteB.getMaxX(), spriteB.getMaxY()) == false) {
+	public static boolean pixelBasedOverlaps(DisplayableSprite spriteA, DisplayableSprite spriteB, double deltaAX, double deltaAY) {
+
+		if (overlaps(spriteA, spriteB, deltaAX, deltaAY) == false) {
 			return false;
 		}
 		
 		BufferedImage bufferedA = (BufferedImage) spriteA.getImage();
 		BufferedImage bufferedB = (BufferedImage) spriteB.getImage();
 		
-		int offsetX = (int) (spriteB.getMinX() - spriteA.getMinX());
-		int offsetY = (int) (spriteB.getMinY() - spriteA.getMinY());
+		int offsetX = (int) (spriteB.getMinX() - (spriteA.getMinX() + deltaAX));
+		int offsetY = (int) (spriteB.getMinY() - (spriteA.getMinY() + deltaAY));
 		
 		int left = Math.max(0, (int) (offsetX));
 		int top =  Math.max(0, (int) (offsetY));
-		int right = (int) (spriteA.getWidth() - Math.max(0, spriteA.getMaxX() - spriteB.getMaxX()));
-		int bottom = (int) (spriteA.getHeight() - Math.max(0, spriteA.getMaxY() - spriteB.getMaxY()));
+		int right = (int) (spriteA.getWidth() - Math.max(0, spriteA.getMaxX() + deltaAX - spriteB.getMaxX()));
+		int bottom = (int) (spriteA.getHeight() - Math.max(0, spriteA.getMaxY() + deltaAY - spriteB.getMaxY()));
 		
 		double scaleXA = bufferedA.getHeight() / (float)spriteA.getWidth();
 		double scaleYA = bufferedA.getHeight() / (float)spriteA.getHeight();
 		double scaleXB = bufferedB.getHeight() /  (float)spriteB.getWidth();
 		double scaleYB = bufferedB.getHeight() /  (float)spriteB.getHeight();
-
-//		System.out.println(String.format("left: %3d; top: %3d right: %3d; bottom: %3d", left,top,right,bottom)); 
 
 		for (int x = left; x < right; x++) {
 			for (int y = top; y < bottom; y++) {
@@ -81,126 +181,124 @@ public class CollisionDetection {
 				if ((xB >= 0) && (yB >= 0) && (yB < bufferedB.getWidth()) && (yB < bufferedB.getHeight())) {
 					int pixelA = bufferedA.getRGB(xA, yA);
 					int pixelB = bufferedB.getRGB(xB, yB);
-//					System.out.println(String.format("A: %02X; B): %02X",pixelA>>>24, pixelB>>>24)) ;
 					if ((pixelA>>>24 > 0x00) && (pixelB>>>24 > 0x00)) {
 						return true;
 					}
 				}
 			}
-		}
+		}	
 		
 		return false;
-		
-		
+				
 	}
 
-	public static boolean covers (double a_left, double a_top, double a_right, double a_bottom, double b_left, double b_top, double b_right, double b_bottom) {
-		return inside(b_left, b_top, b_right, b_bottom, a_left, a_top, a_right, a_bottom);
+	public void calculate2DBounce(VirtualSprite twoDBounce, DisplayableSprite sprite, ArrayList<DisplayableSprite> barriers, double velocityX, double velocityY, long actual_delta_time ) {
+		calculate2DBounce(twoDBounce, sprite, barriers, velocityX,  velocityY,  actual_delta_time, null);
 	}
 
-	public void calculate2DBounce(TwoDimensionBounce twoDBounce, DisplayableSprite sprite, ArrayList<DisplayableSprite> barriers, double velocityX, double velocityY, long actual_delta_time ) {
+	
+	public VirtualSprite calculate2DBounce(VirtualSprite bounce, DisplayableSprite sprite, ArrayList<DisplayableSprite> barriers, double velocityX, double velocityY, long actual_delta_time, Class type) {
 
-		if (twoDBounce == null) {
-			twoDBounce = new TwoDimensionBounce();
+		if (bounce == null) {
+			bounce = new VirtualSprite();
 		}
+
+		//create a copy of the sprite's location and velocity
+		bounce.velocityX = velocityX;
+		bounce.velocityY = velocityY;
+		bounce.centerX = sprite.getCenterX();
+		bounce.centerY = sprite.getCenterY();
+		bounce.didBounce = false;		
 
 		//calculate new position assuming there are no changes in direction
 		double movementX = (velocityX * actual_delta_time * 0.001);
 		double movementY = (velocityY * actual_delta_time * 0.001);
 
-		twoDBounce.newVelocityX = velocityX;
-		twoDBounce.newVelocityY = velocityY;
-		twoDBounce.newX = sprite.getMinX() + movementX;
-		twoDBounce.newY = sprite.getMinY() + movementY;
-		twoDBounce.didBounce = false;
-
+		//regular motion
+		bounce.centerX += movementX;
+		bounce.centerY += movementY;
+		
 		for (DisplayableSprite barrier : barriers) {
-			//colliding with top edge of barrier?
-			//?moving down (can only collide if sprite is moving down)
-			if (movementY > 0) {
-				//?is the sprite to the left || right of the barrier? (can only collide if this is not the case) 
-				if (!( (sprite.getMinX() >= barrier.getMaxX()) || (sprite.getMaxX() <= barrier.getMinX()))) {
-					calculateOneDBounce(bounce, sprite.getMaxY(), movementY, barrier.getMinY(), bounceFactorY);
-					if (bounce.didBounce) {
-						twoDBounce.newY = bounce.newLocaton - sprite.getHeight();
-						//cannot use the returned velocity as it actually (in this case) represents movement for the given delta time
-						twoDBounce.newVelocityY = (velocityY * bounceFactorY * -1);
-						twoDBounce.didBounce = true;
+						
+			if ( (sprite == barrier) || (type != null) && (barrier.getClass().equals(type) == false)) {
+				continue;				
+			}
+						
+			//collision for sprite's current position
+			boolean doesCollide = overlaps(sprite, barrier, 0, 0);
+			//collision for sprite's next position
+			boolean willCollide = overlaps(sprite, barrier, movementX, movementY);
+			
+			//is already colliding!
+			if (doesCollide) {
+				//determine distance of overlap in both dimensions with current position of A
+				double overlapX = overlap(sprite.getMinX(), sprite.getMaxX(), barrier.getMinX(), barrier.getMaxX());
+				double overlapY = overlap(sprite.getMinY(), sprite.getMaxY(), barrier.getMinY(), barrier.getMaxY());
+				//likely that one of the overlaps is very small (A moved slightly into B); the other overlap may be zero;
+				//choose the shorter overlap and bounce only in that direction to extract from the collision
+				if (overlapY > overlapX) {
+					//bounce in X dimension, but only if A is moving closer to B... otherwise, collision is already resolving
+					if ( Math.signum(velocityX) ==  Math.signum(barrier.getCenterX() - sprite.getCenterX())) {
+						//invert the proposed motion
+						bounce.centerX = sprite.getCenterX() - movementX;
+						bounce.velocityX = (velocityX * bounceFactorX * -1);
+					}					
+				} else {
+					//bounce in Y dimension
+					if ( Math.signum(velocityY) ==  Math.signum(barrier.getCenterY() - sprite.getCenterY())) {
+						//invert the proposed motion
+						bounce.centerY = sprite.getCenterY() - movementY;
+						bounce.velocityY = (velocityY * bounceFactorY * -1);
+					}										
+				}				
+			}
+			//will collide with calculated movement
+			else if (willCollide) {
+				//treat x dimension and y dimension separately
+				//x dimension
+				boolean willCollideX = overlaps(sprite, barrier, movementX, 0);
+				if (willCollideX) {
+					if (velocityX > 0) {
+						//moving to right
+						double distanceToBoundary = (barrier.getMinX() - sprite.getMaxX());
+						double leadingEdge = barrier.getMinX() - ( (movementX - distanceToBoundary) * bounceFactorX);
+						bounce.centerX = leadingEdge - (sprite.getWidth() / 2);
+						bounce.velocityX = (velocityX * bounceFactorX * -1);
 					}
+					else {
+						//moving to left
+						double distanceToBoundary = (sprite.getMinX() - barrier.getMaxX() );
+						double leadingEdge = barrier.getMaxX() + ( ((movementX * -1) - distanceToBoundary) * bounceFactorX);
+						bounce.centerX = leadingEdge + (sprite.getWidth() / 2);
+						bounce.velocityX = (velocityX * bounceFactorX * -1);
+					}
+				}
+				//y dimension
+				boolean willCollideY = overlaps(sprite, barrier, 0, movementY);
+				if (willCollideY) {
+					if (velocityY > 0) {
+						//moving down
+						double distanceToBoundary = (barrier.getMinY() - sprite.getMaxY());
+						double leadingEdge = barrier.getMinY() - ( (movementY - distanceToBoundary) * bounceFactorY);
+						bounce.centerY = leadingEdge - (sprite.getWidth() / 2);
+						bounce.velocityY = (velocityY * bounceFactorY * -1);
+					}
+					else {
+						//moving up
+						double distanceToBoundary = (sprite.getMinY() - barrier.getMaxY() );
+						double leadingEdge = barrier.getMaxY() + ( ((movementY * -1) - distanceToBoundary) * bounceFactorY);
+						bounce.centerY = leadingEdge + (sprite.getWidth() / 2);
+						bounce.velocityY = (velocityY * bounceFactorY * -1);
+					}
+					
 				}
 			}
-
-			//colliding with bottom edge of barrier?
-			//?moving up (can only collide if sprite is moving up)
-			if (movementY < 0) {
-				//is the sprite to the left || right of the barrier? (can only collide if this is not the case) 
-				if (! ((sprite.getMinX() >= barrier.getMaxX()) || (sprite.getMaxX() <= barrier.getMinX()))) {
-					calculateOneDBounce(bounce, sprite.getMinY(), movementY, barrier.getMaxY(), bounceFactorY);
-					if (bounce.didBounce) {
-						twoDBounce.newY = bounce.newLocaton;
-						twoDBounce.newVelocityY = (velocityY * bounceFactorY * -1);
-						twoDBounce.didBounce = true;
-					}
-				}
-			}
-
-			//colliding with left edge of barrier?
-			//?moving right (can only collide if sprite is moving to right)
-			if (movementX > 0) {
-				//?is the sprite above || below the barrier? (can only collide if this is not the case) 
-				if (!( (sprite.getMinY() >= barrier.getMaxY()) || (sprite.getMaxY() <= barrier.getMinY()))) {
-					calculateOneDBounce(bounce, sprite.getMaxX(), movementX, barrier.getMinX(), bounceFactorX);
-					if (bounce.didBounce) {
-						twoDBounce.newX = bounce.newLocaton - sprite.getWidth();
-						twoDBounce.newVelocityX = (velocityX * bounceFactorX * -1);
-						twoDBounce.didBounce = true;
-					}
-				}
-			}
-
-			//colliding with right edge of barrier?
-			//?moving left (can only collide if sprite is moving to left)
-			if (movementX < 0) {
-				//?is the sprite above || below the barrier? (can only collide if this is not the case) 
-				if (!( (sprite.getMinY() >= barrier.getMaxY()) || (sprite.getMaxY() <= barrier.getMinY()))) {
-					calculateOneDBounce(bounce, sprite.getMinX(), movementX, barrier.getMaxX(), bounceFactorX);
-					if (bounce.didBounce) {
-						twoDBounce.newX = bounce.newLocaton;
-						twoDBounce.newVelocityX = (velocityX * bounceFactorX * -1);
-						twoDBounce.didBounce = true;
-					}
-				}
+			//will not collide
+			else {
 			}
 		}
+	
+		return bounce;
+		
 	}
-
-	/**
-	 * @param lineBounce: will contain the results of the bounce calculation; cannot be null
-	 */
-	public void calculateOneDBounce(OneDimensionBounce oneDBounce, double location, double velocity, double boundary, double bounceFactor) {
-
-		double distanceToBoundary = 0;
-		if (oneDBounce == null) {
-			oneDBounce = new OneDimensionBounce();
-		}
-
-		if ( (velocity > 0) && (location <= boundary) && ((location + velocity) >= boundary)) {
-			distanceToBoundary = (boundary - location);
-			oneDBounce.newLocaton = boundary - ( (velocity - distanceToBoundary) * bounceFactor);
-			oneDBounce.newVelocity = (velocity * bounceFactor * -1);
-			oneDBounce.didBounce = true;
-		}
-		else if (velocity < 0 && (location >= boundary) && ((location + velocity) <= boundary)) {
-			distanceToBoundary = (location - boundary);
-			oneDBounce.newLocaton = boundary - ( (velocity + distanceToBoundary) * bounceFactor);
-			oneDBounce.newVelocity = (velocity * bounceFactor * -1);
-			oneDBounce.didBounce = true;
-		}
-		else {
-			oneDBounce.newLocaton = location + velocity;
-			oneDBounce.newVelocity = velocity;
-			oneDBounce.didBounce = false;
-		}
-
-	}	
 }
