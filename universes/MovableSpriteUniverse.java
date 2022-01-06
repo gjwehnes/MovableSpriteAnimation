@@ -19,8 +19,13 @@ public class MovableSpriteUniverse implements Universe {
 	
 	this.setXCenter(0);
 	this.setYCenter(0);
+
 	player1 = new ABCSprite();
 	sprites.add(player1);
+
+	MovableSprite movable = (MovableSprite)player1;
+	movable.setCenterX(-300);
+	movable.setCenterY(-200);
 	
 }
 	

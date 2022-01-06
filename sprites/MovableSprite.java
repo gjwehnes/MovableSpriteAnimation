@@ -9,6 +9,4 @@ public interface MovableSprite {
 	
 	public void setVelocityY(double pixelsPerSecond);
 		
-	public void stop();
-	
 }
