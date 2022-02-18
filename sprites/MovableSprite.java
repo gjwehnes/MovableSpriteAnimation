@@ -5,10 +5,8 @@ public interface MovableSprite {
 	
 	public void setCenterY(double centerY);
 	
-	public void moveX(double pixelsPerSecond);
+	public void setVelocityX(double pixelsPerSecond);
 	
-	public void moveY(double pixelsPerSecond);
+	public void setVelocityY(double pixelsPerSecond);
 		
-	public void stop();
-	
 }

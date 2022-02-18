@@ -19,8 +19,13 @@ public class MovableSpriteUniverse implements Universe {
 	
 	this.setXCenter(0);
 	this.setYCenter(0);
+
 	player1 = new ABCSprite();
 	sprites.add(player1);
+
+	MovableSprite movable = (MovableSprite)player1;
+	movable.setCenterX(-300);
+	movable.setCenterY(-200);
 	
 }
 	
@@ -49,8 +54,8 @@ public class MovableSpriteUniverse implements Universe {
 	public void setComplete(boolean complete) {
 	}
 
-	public Background getBackground() {
-		return background;
+	public ArrayList<Background> getBackgrounds() {
+		return null;
 	}
 
 	public DisplayableSprite getPlayer1() {
@@ -92,11 +97,11 @@ public class MovableSpriteUniverse implements Universe {
 			
 			if (sprite instanceof MovableSprite) {
 				MovableSprite movable = (MovableSprite)sprite;
-				movable.moveX(velocityX);
-				movable.moveY(velocityY);
+				movable.setVelocityX(velocityX);
+				movable.setVelocityY(velocityY);
 			}
 			
-			sprite.update(this, keyboard, actual_delta_time);
+			sprite.update(this, null, actual_delta_time);
     	}    	
 
 	}
