@@ -54,8 +54,8 @@ public class MovableSpriteUniverse implements Universe {
 	public void setComplete(boolean complete) {
 	}
 
-	public Background getBackground() {
-		return background;
+	public ArrayList<Background> getBackgrounds() {
+		return null;
 	}
 
 	public DisplayableSprite getPlayer1() {
