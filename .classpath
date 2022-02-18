@@ -5,9 +5,6 @@
 	<classpathentry kind="src" path="universes"/>
 	<classpathentry kind="src" path="sprites"/>
 	<classpathentry kind="src" path="animations"/>
-<<<<<<< HEAD
-=======
 	<classpathentry kind="src" path="/AnimationShell"/>
->>>>>>> refs/remotes/origin/revisions_winter_2022
 	<classpathentry kind="output" path="bin"/>
 </classpath>
