@@ -70,25 +70,25 @@ public class MovableSpriteUniverse implements Universe {
 		return false;
 	}		
 	
-	public void update(KeyboardInput keyboard, long actual_delta_time) {
+	public void update(Animation animation, long actual_delta_time) {
 
 		double velocityX = 0;
 		double velocityY = 0;
 		
 		//LEFT	
-		if (keyboard.keyDown(37)) {
+		if (KeyboardInput.getKeyboard().keyDown(37)) {
 			velocityX = -VELOCITY;
 		}
 		//UP
-		if (keyboard.keyDown(38)) {
+		if (KeyboardInput.getKeyboard().keyDown(38)) {
 			velocityY = -VELOCITY;			
 		}
 		// RIGHT
-		if (keyboard.keyDown(39)) {
+		if (KeyboardInput.getKeyboard().keyDown(39)) {
 			velocityX += VELOCITY;
 		}
 		// DOWN
-		if (keyboard.keyDown(40)) {
+		if (KeyboardInput.getKeyboard().keyDown(40)) {
 			velocityY += VELOCITY;			
 		}
 		
@@ -101,7 +101,7 @@ public class MovableSpriteUniverse implements Universe {
 				movable.setVelocityY(velocityY);
 			}
 			
-			sprite.update(this, null, actual_delta_time);
+			sprite.update(this, actual_delta_time);
     	}    	
 
 	}
