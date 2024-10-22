@@ -75,21 +75,25 @@ public class MovableSpriteUniverse implements Universe {
 		double velocityX = 0;
 		double velocityY = 0;
 		
-		//LEFT	
-		if (KeyboardInput.getKeyboard().keyDown(37)) {
-			velocityX = -VELOCITY;
-		}
-		//UP
-		if (KeyboardInput.getKeyboard().keyDown(38)) {
-			velocityY = -VELOCITY;			
-		}
-		// RIGHT
-		if (KeyboardInput.getKeyboard().keyDown(39)) {
+		elapsedTime += actual_delta_time;
+		long period = elapsedTime / 2000;
+		long phase = period % 4;
+		
+		if (phase == 0 ) {
+			// RIGHT
 			velocityX += VELOCITY;
 		}
-		// DOWN
-		if (KeyboardInput.getKeyboard().keyDown(40)) {
-			velocityY += VELOCITY;			
+		else if (phase == 1) {
+			// DOWN
+			velocityY += VELOCITY;						
+		}
+		else if (phase == 2) {			
+			//LEFT	
+			velocityX = -VELOCITY;			
+		}
+		else {
+			//UP
+			velocityY = -VELOCITY;						
 		}
 		
 		for (int i = 0; i < sprites.size(); i++) {
